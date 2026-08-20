@@ -17,6 +17,19 @@ Check before scaffolding — don't guess from training data.
 
 ---
 
+## AGENTS.md — Framework Version Pinning
+
+AI agents have deep knowledge of popular frameworks — but that knowledge is often months behind the latest release. Prevent broken code by pinning exact framework versions at repo root.
+
+- [ ] Create an `AGENTS.md` at the repo root for each major framework in use
+- [ ] Format: one-line warning + link to exact versioned docs
+- [ ] Examples from existing repos:
+  - **Expo:** `# Expo HAS CHANGED\nRead the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.`
+  - **Next.js:** `# This is NOT the Next.js you know\nThis version has breaking changes… Read node_modules/next/dist/docs/`
+- [ ] Do this on day one — before any code is written
+
+---
+
 ## Phase 1: Idea Validation & Scoping
 - [ ] State the problem in one sentence
 - [ ] Identify the primary user
@@ -29,6 +42,7 @@ Check before scaffolding — don't guess from training data.
 - [ ] Scaffold the project with the chosen stack
 - [ ] Stack default: Python and TypeScript first; React Native or native Swift + Xcode sidecar for mobile; OpenRouter or Replit AI integration for in-app AI features
 - [ ] Default to Neon Postgres for persistence unless the app specifically requires otherwise — skip DB evaluation
+- [ ] Pin framework version warnings in repo-root `AGENTS.md` before writing any code (see AGENTS.md section above)
 - [ ] Implement only the single core feature from Phase 1
 - [ ] Add minimal auth only if user accounts are required
 - [ ] Build bare minimum UI — function over form
@@ -36,6 +50,9 @@ Check before scaffolding — don't guess from training data.
 - [ ] Remove or stub every non-essential feature request
 - [ ] Document required Replit preview port (5000) and any other platform-specific config quirks before deploying
 - [ ] Ship to a testable environment (TestFlight, Vercel preview, or similar)
+- [ ] **Icon governance:** Define custom SVG icons for visible surfaces (nav, feature cards, headers); library icons (Phosphor/Lucide) are for utilities only. Document this in CLAUDE.md before the first UI commit — the user is sensitive to stock icons matching competitors
+- [ ] **Env var hygiene:** Use separate dev/prod DB connection strings (never a single `DATABASE_URL`). Make every optional feature degrade gracefully when its env var is missing — no crashes for unset optional vars
+- [ ] **Replit persistence:** If deploying on Replit, pin `CLAUDE_CONFIG_DIR` to `/home/runner/workspace/.local/state/claude` in `.replit` so Claude Code auth survives server resets
 
 ## Phase 3: Post-MVP Hardening
 - [ ] Add proper error handling and logging across all core flows
@@ -69,6 +86,14 @@ Two tiers — quick fixes vs. structural issues.
 | 2026-08-19 | auth | Multiple app inboxes under root account not structured from the start — painful migration | Structure multi-app inbox provisioning under one root Agent Mail account from day one |
 | 2026-08-19 | API | Neon connection pool exhaustion under concurrent scrapers | Set connection pool limits per service; use PgBouncer for high-concurrency workloads |
 | 2026-08-19 | infrastructure | CUDA/NVIDIA vast.ai templates waste ~29GB of root disk on drivers — "No space left" | Use plain Ubuntu 22.04 template for CPU-only workloads (bulk OCR, scraping) |
+| 2026-08-19 | API | Expo SDK version drift — agents default to old Expo knowledge, write broken code | Pin exact SDK version in repo-root AGENTS.md (pattern from ECHO) |
+| 2026-08-19 | API | Next.js breaking changes — agents write code against deprecated APIs | Same AGENTS.md pattern: version warning and link to exact docs at repo root (JOB-HUNTER, thrift-lens) |
+| 2026-08-19 | infrastructure | Replit /home/runner is ephemeral — Claude Code OAuth tokens wiped on every reset | Set `CLAUDE_CONFIG_DIR` to `/home/runner/workspace/.local/state/claude` in `.replit` (MORAN-WEBSITE) |
+| 2026-08-19 | deployment | pnpm db:push accidentally targets production DB — pushed schema changes to wrong database | Enforce `DB_TARGET=production DB_CONFIRM=production` to allow production pushes (MORAN-WEBSITE pattern) |
+| 2026-08-19 | deployment | Agent builds new feature with a library icon when a custom SVG already exists — UI looks like a template | Define icon policy in CLAUDE.md: custom SVGs for visible surfaces, library icons only for utilities |
+| 2026-08-19 | API | Printify webhook duplicates orders on retry — no idempotency key | Always use idempotency keys on webhook handlers; dedupe by Stripe event ID |
+| 2026-08-19 | app store | App Store review rejects for missing privacy manifest or inaccurate permission strings | Add privacy manifest and permission string audit to Phase 3 mobile checklist before submission |
+| 2026-08-19 | infrastructure | Agent's deep knowledge of a framework is months behind latest release | Pin exact framework version + docs URL in an AGENTS.md file at repo root on day one |
 
 **Architecture Decision Records** (for structural/design issues that should change how future apps get built — not just what broke)
 | Date | Decision | Reasoning | Applies To Future Projects |
@@ -77,6 +102,11 @@ Two tiers — quick fixes vs. structural issues.
 | 2026-08-19 | Uniform SCRUM board per repo (Backlog/Working/Archive + CLAUDE.md) | Central SCRUM tracks sprints; per-repo boards let agents claim tasks independently without stepping on each other | Yes — every new repo gets the same SCRUM/ structure from the scaffold template |
 | 2026-08-19 | Use spawn (not fork) for Python multiprocessing with PyMuPDF | fitz hangs under fork — child processes never execute. Spawn fixes it completely | Yes — use spawn start method for any multiprocessing that imports fitz or other C-extension libs |
 | 2026-08-19 | pnpm workspaces for monorepos, npm for single-package | pnpm workspace resolution catches cross-package type errors at build time; npm workspaces lack strict isolation | Yes — monorepo = pnpm, single package = npm |
+| 2026-08-19 | Always pin framework version warning in repo-root AGENTS.md | Expo, Next.js, and fast-moving frameworks change rapidly; agents trained on older data produce broken code. The AGENTS.md pattern catches this first thing | Yes — include AGENTS.md template in scaffold |
+| 2026-08-19 | Separate dev/prod DB connection strings (never a single DATABASE_URL) | MORAN-WEBSITE uses APP_DATABASE_URL + APP_DATABASE_DEVELOPMENT — prevents accidental production schema pushes | Yes — use two-var pattern in .env.example template |
+| 2026-08-19 | Env vars should be optional-degrade (no-op when unset), not crash | MORAN-WEBSITE pattern: every optional feature degrades gracefully when its env var is missing, making dev setup radically simpler | Yes — follow this pattern for all feature-gated code |
+| 2026-08-19 | Visible UI uses custom SVG icons; library icons only for utilities | User is sensitive to stock icons matching competitors. MINDGAMES custom lift-icons set proved this matters for brand differentiation | Yes — add icon governance to Phase 2 build checklist |
+| 2026-08-19 | Replit projects using Claude Code must pin CLAUDE_CONFIG_DIR to a persistent path | Ephemeral /home/runner wipes OAuth tokens on every reset. Pinning to workspace path makes login survive reboots | Yes — add .replit CLAUDE_CONFIG_DIR to Replit scaffold docs |
 
 - [ ] Before starting a new app, read this log first and check for applicable fixes
 - [ ] Update the log immediately when resolved, not after the sprint ends
@@ -92,7 +122,8 @@ This repo ships with reusable file templates in `templates/`:
 | `templates/task.md` | SCRUM backlog task file with YAML frontmatter |
 | `templates/adr.md` | Architecture Decision Record template |
 | `templates/claude.md` | Per-repo CLAUDE.md agent startup instructions |
-| `templates/.env.example` | Standard env vars template for new projects |
+| `templates/AGENTS.md` | Framework version pinning warning — place at repo root for Expo, Next.js, etc. |
+| `templates/.env.example` | Standard env vars template (two-var DB pattern, optional-degrade convention) |
 | `templates/pull_request.md` | PR description template |
 | `templates/scrum_reference.md` | SCRUM board protocol reference |
 
