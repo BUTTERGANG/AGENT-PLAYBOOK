@@ -61,6 +61,7 @@ AI agents have deep knowledge of popular frameworks — but that knowledge is of
 - [ ] Check app store / Play store compliance requirements for target platform
 - [ ] Add crash reporting and basic analytics
 - [ ] Add automated tests for the core feature path
+- [ ] **Test defaults:** Vitest + Playwright for TypeScript/React projects; pytest + pytest-cov for Python. One integration test per core flow, unit tests for utility functions. Don't over-invest in test coverage at MVP stage
 - [ ] Test on at least one physical device per platform before submission — simulators miss camera, GPS, push notifications, biometrics, and real network conditions
 - [ ] Validate against current App Store / Play Store review guidelines (privacy manifest, permission strings, screenshot/metadata accuracy) — not just functional testing
 - [ ] Review and tighten data privacy, especially user information
@@ -134,6 +135,32 @@ Copy these into a new repo, fill in the variables, and commit.
 ## Auth Pattern
 - [ ] Use Agent Mail for 2FA and inbox provisioning
 - [ ] Structure multiple app inboxes under one root account from the start
+
+---
+
+## Parallel Work / Subagent Pattern
+
+For non-trivial builds, parallelize independent workstreams by spawning subagents. This cuts build time significantly.
+
+### When to parallelize
+
+- **Frontend + backend** — build API routes and UI screens simultaneously
+- **Scraper + database** — write scraper and schema/migrations in parallel
+- **Multiple independent features** — e.g., auth + payment + notifications if they don't share logic
+
+### How it works
+
+1. Break the build into independent workstreams (each has its own goal, context, and output)
+2. Spawn one subagent per workstream using `delegate_task` (or equivalent multi-agent tool)
+3. Each subagent gets: isolated goal, relevant context, output expectations
+4. Parent collects results and reconciles — merges, resolves conflicts, runs integration tests
+
+### Rules
+
+- Each subagent must be **self-contained** — pass everything it needs (file paths, schemas, env vars). Subagents know nothing about the parent conversation
+- Never parallelize tasks that share mutable state — you'll get merge conflicts
+- Verify subagent output before telling the user it worked — child summaries are self-reports, not verified facts
+- For UI work, spawn a dedicated subagent for screenshot-based visual verification after the main build subagent finishes
 
 ---
 
