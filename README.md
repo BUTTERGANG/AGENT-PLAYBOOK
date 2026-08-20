@@ -120,21 +120,25 @@ This repo ships with reusable file templates in `templates/` and a scaffolding s
 
 | File | Use |
 |------|-----|
-| `scaffold.sh` | **One-command repo scaffold** — stamps out the full structure with `--framework` and `--init` flags |
+| `scaffold.sh` | **One-command repo scaffold** — stamps out the full structure with `--framework`, `--init`, and `--link` flags |
 | `templates/task.md` | SCRUM backlog task file with YAML frontmatter |
 | `templates/adr.md` | Architecture Decision Record template |
 | `templates/claude.md` | Per-repo CLAUDE.md agent startup instructions |
-| `templates/AGENTS.md` | Framework version pinning warning — place at repo root for Expo, Next.js, etc. |
+| `templates/AGENTS.md` | Generic framework version pinning warning |
+| `templates/agents_expo.md` | Expo-specific AGENTS.md (versioned doc link, breaking changes warning) |
+| `templates/agents_nextjs.md` | Next.js-specific AGENTS.md (node_modules docs link, breaking changes warning) |
 | `templates/.env.example` | Standard env vars template (two-var DB pattern, optional-degrade convention) |
+| `templates/.gitignore` | Standard BUTTERGANG ignore list |
 | `templates/pull_request.md` | PR description template |
 | `templates/scrum_reference.md` | SCRUM board protocol reference |
 
 To scaffold a new repo:
 
 ```bash
-./scaffold.sh my-new-app                          # Web app (default)
-./scaffold.sh my-expo-app --framework expo --init  # Expo + git init
-./scaffold.sh my-tool --framework none             # No framework files
+./scaffold.sh my-new-app                                    # Web app (default)
+./scaffold.sh my-expo-app --framework expo --init            # Expo + git init
+./scaffold.sh my-next-app --framework nextjs --init --link https://github.com/BUTTERGANG/my-next-app  # Next.js + git + push
+./scaffold.sh my-tool --framework none                       # No framework files
 ```
 
 Copy these into a new repo, fill in the variables, and commit.
