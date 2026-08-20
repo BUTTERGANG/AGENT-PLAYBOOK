@@ -116,10 +116,11 @@ Two tiers — quick fixes vs. structural issues.
 
 ## Templates
 
-This repo ships with reusable file templates in `templates/`:
+This repo ships with reusable file templates in `templates/` and a scaffolding script:
 
 | File | Use |
 |------|-----|
+| `scaffold.sh` | **One-command repo scaffold** — stamps out the full structure with `--framework` and `--init` flags |
 | `templates/task.md` | SCRUM backlog task file with YAML frontmatter |
 | `templates/adr.md` | Architecture Decision Record template |
 | `templates/claude.md` | Per-repo CLAUDE.md agent startup instructions |
@@ -127,6 +128,14 @@ This repo ships with reusable file templates in `templates/`:
 | `templates/.env.example` | Standard env vars template (two-var DB pattern, optional-degrade convention) |
 | `templates/pull_request.md` | PR description template |
 | `templates/scrum_reference.md` | SCRUM board protocol reference |
+
+To scaffold a new repo:
+
+```bash
+./scaffold.sh my-new-app                          # Web app (default)
+./scaffold.sh my-expo-app --framework expo --init  # Expo + git init
+./scaffold.sh my-tool --framework none             # No framework files
+```
 
 Copy these into a new repo, fill in the variables, and commit.
 

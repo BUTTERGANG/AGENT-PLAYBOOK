@@ -14,5 +14,6 @@ Initial release. Reusable development template for AI agents building BUTTERGANG
 - Phase 3 additions: testing defaults (Vitest/Playwright/pytest)
 - New section: Parallel Work / Subagent Pattern for multi-agent builds
 - Phase 5 Lessons Log seeded with 14 real quick fixes and 9 ADRs from BUTTERGANG project history
-- SCRUM board with 5 backlog tasks (1 completed, moved to Archive)
+- SCRUM board with 4 backlog tasks (2 completed, moved to Archive)
 - templates/ directory with 7 reusable file templates
+- scaffold.sh — one-command repo scaffold with --framework and --init flags
