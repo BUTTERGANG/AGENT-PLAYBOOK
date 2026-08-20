@@ -32,6 +32,11 @@ updated: <ISO-8601>
 ```
 Move it: `SCRUM/Backlog/` → `SCRUM/Working/`
 
+### 5. Work Within Scope
+Only edit files related to your claimed task. See the **Technical Notes** section of your task file for the exact file scope.
+If multiple agents are active, follow the **Multi-Agent Coordination** protocol in the AGENT-PLAYBOOK.
+Treat shared files (like route aggregators) as append-only — never remove another agent's imports.
+
 ---
 
 ## Task Lifecycle

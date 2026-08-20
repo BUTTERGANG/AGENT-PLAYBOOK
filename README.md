@@ -211,6 +211,56 @@ For non-trivial builds, parallelize independent workstreams by spawning subagent
 
 ---
 
+## Multi-Agent Coordination
+
+When multiple agents work on the same repo simultaneously, the SCRUM board is the coordination layer. Here's how to avoid stepping on each other.
+
+### Agent Protocol for Concurrent Work
+
+Every agent follows this checklist when starting a session:
+
+1. **`git pull`** — sync with latest remote state
+2. **Check vault lock** — read `SCRUM/CLAUDE.md` frontmatter. If `vault_lock: true`, STOP — do not claim anything
+3. **Check existing claims** — `grep -r "agent_claimed:" SCRUM/Working/ SCRUM/Backlog/` — see what's claimed and by whom
+4. **Pick an unclaimed task** — find one with `agent_claimed: null` and `status: sprint` in `SCRUM/Sprint_View.md`
+5. **Claim it in frontmatter** — stamp your agent-id and timestamp, then move the file from `Backlog/` to `Working/`
+6. **Work within scope** — only edit files related to your claimed task. If you need to modify a shared file (e.g., route index, schema), communicate with the agent holding the file (or wait)
+7. **Commit and push** before ending the session
+
+### File Ownership Convention
+
+Each task file in the backlog specifies its file scope in **Technical Notes**. Agents must respect these boundaries:
+
+```
+# In a task's Technical Notes section:
+- Scope: packages/api/src/routes/timeline.routes.ts, packages/app/src/pages/timeline-page.tsx
+- Shared files: packages/api/src/routes/index.ts (append-only — add import, don't remove others)
+```
+
+### Avoiding Conflicts
+
+| Situation | Solution |
+|-----------|----------|
+| Two agents need the same file | The task should be one ticket, not two. Merge the tasks or split the file first |
+| Agent needs to edit a shared file | Mark the file as "locked" in a comment at the top: `// LOCKED by agent-abc — working on schedule feature` |
+| Agent session dies mid-work | `claimed_at` timestamp shows when work started. If >2 hours with no commits, treat as stale and re-claim |
+| Merge conflict on push | Resolve via git: `git pull --rebase`, fix conflicts, test, push. Log the conflict in Phase 5 Lessons Log |
+| Vault lock needed | Set `vault_lock: true` in `SCRUM/CLAUDE.md` with `locked_by` and `lock_reason`. Only the locker or a SUPERADMIN should unlock |
+
+### Monorepo Package Isolation
+
+The `packages/*` structure provides natural isolation — agents working in separate packages almost never conflict:
+
+```
+packages/db/   → schema only     (agent A)
+packages/api/  → server routes   (agent B)  
+packages/app/  → frontend pages  (agent C)
+```
+
+Only `packages/api/src/routes/index.ts` (the route aggregator) is a shared file — treat it as append-only to avoid conflicts.
+
+---
+
 ## SCRUM Board
 
 This repo has its own SCRUM board at `SCRUM/` with backlog tasks for playbook improvements. See `templates/scrum_reference.md` for the protocol.
